@@ -1,0 +1,58 @@
+# Python-related
+__pycache__/
+*.py[cod]
+*.so
+*.swp
+*.swo
+*.swn
+*.log
+
+# Virtual Environments
+venv/
+.env
+*.env
+*.venv
+*.log
+Pipfile.lock
+
+# FastAPI-specific
+*.db
+instance/
+config.json
+secrets.json
+
+# Machine Learning Models & Data
+ml_models/
+*.pkl
+*.h5
+*.onnx
+*.joblib
+*.ckpt
+*.tflite
+*.npy
+*.npz
+data/
+datasets/
+*.csv
+*.xlsx
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# React/Frontend
+node_modules/
+*.log
+dist/
+build/
+.env.local
+.env.development
+.env.production
+package-lock.json
+yarn.lock
+
+docker-compose.override.yml
+*.pid
+
+.vscode/
+.idea/
+*.iml
