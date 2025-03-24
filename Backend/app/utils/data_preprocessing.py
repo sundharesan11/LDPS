@@ -17,7 +17,7 @@ class Preprocessor:
         self.scaler = fitted_scaler if fitted_scaler else StandardScaler()
         self.categorical_encoders = categorical_encoders if categorical_encoders else {}
         self.numerical_features = ['income', 'age', 'experience', 'current_job_years', 'current_house_years']
-        self.categorical_features = ['house_ownership', 'profession', 'state', 'car_ownership', 'marital_status']
+        self.categorical_features = ['house_ownership', 'profession', 'state', 'car_ownership', 'marital_Status']
     
     def fit(self, data):
         """
@@ -155,52 +155,21 @@ class Preprocessor:
         with open(filename, 'rb') as f:
             return pickle.load(f)
 
-def preprocess_for_prediction(data, preprocessor_path: str):
-    try:
-        # Load the saved preprocessor
-        print(preprocessor_path)
-        print(f"Loading preprocessor from: {preprocessor_path}")
-        with open(preprocessor_path, 'rb') as f:
-            preprocessor = pickle.load(f)
-        print("Preprocessor loaded successfully")
-
-        # Handle different input types
-        if isinstance(data, pd.DataFrame):
-            # If it's already a DataFrame, use it directly
-            df = data.copy()
-        elif hasattr(data, 'dict'):
-            # If it's a Pydantic model
-            data_dict = data.dict()
-            # Convert enum values to their string representations
-            for key, value in data_dict.items():
-                if hasattr(value, 'value'):
-                    data_dict[key] = value.value
-            df = pd.DataFrame([data_dict])
-        else:
-            # If it's a dictionary
-            df = pd.DataFrame([data])
-        
-        # Rename columns to match expected format
-        df = df.rename(columns={
-            'home_ownership': 'house_ownership'
-        })
-        
-        print("Data converted to DataFrame")
-        
-        # Make sure numerical features are properly converted to float
-        for feature in preprocessor.numerical_features:
-            if feature in df.columns:
-                df[feature] = df[feature].astype(float)
-        
-        # Transform the data
-        processed_data = preprocessor.transform(df)
-        print("Data transformed successfully")
-        
-        return processed_data
-        
-    except Exception as e:
-        print(f"Error in preprocess_for_prediction: {str(e)}")
-        print(f"Error type: {type(e)}")
-        import traceback
-        print(f"Traceback: {traceback.format_exc()}")
-        raise
+def preprocess_for_prediction(data, preprocessor_path):
+    """
+    Preprocess new data for prediction using a saved preprocessor.
+    
+    Parameters:
+    data: pandas DataFrame with new data
+    preprocessor_path: Path to the saved preprocessor
+    
+    Returns:
+    processed_data: Preprocessed numpy array ready for prediction
+    """
+    # Load the saved preprocessor
+    with open(preprocessor_path, "rb") as f:
+        preprocessor = pickle.load(f)
+    
+    # Transform the data
+    processed_data = preprocessor.transform(data)
+    return processed_data

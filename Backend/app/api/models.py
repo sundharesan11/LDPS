@@ -108,7 +108,7 @@ class LoanApplicationRequest(BaseModel):
     current_house_years: float = Field(..., ge=0)
     home_ownership: HomeOwnershipType
     car_ownership: CarOwnership
-    marital_status: MaritalStatusType
+    # marital_status: MaritalStatusType
     profession: Profession
     state: State
 
@@ -120,7 +120,7 @@ class LoanApplicationRequest(BaseModel):
                 "experience": 5.5,
                 "home_ownership": "rented",
                 "car_ownership": "yes",
-                "marital_status": "married",
+                # "marital_Status": "married",
                 "profession": "Engineer",
                 "current_job_years": 1.2,
                 "current_house_years": 2.4,

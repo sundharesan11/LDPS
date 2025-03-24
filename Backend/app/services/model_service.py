@@ -7,7 +7,7 @@ import os
 from functools import lru_cache
 import pandas as pd
 from app.api.models import LoanApplicationRequest, ModelPrediction
-from app.utils.preprocessing import Preprocessor
+from app.utils.data_preprocessing import Preprocessor
 from app.core.config import get_settings
 
 class ModelService:
@@ -46,15 +46,25 @@ class ModelService:
             # Load preprocessor
             preprocessor_path = os.path.join(self.model_dir, "preprocessor.pkl")
             print(f"Loading preprocessor from: {preprocessor_path}")
-            with open(preprocessor_path, "rb") as f:
-                try:
-                    self.preprocessor = pickle.load(f)
-                except ModuleNotFoundError:
-                    # If we can't load the preprocessor due to module not found,
-                    # create a new one with default settings
-                    print("Creating new preprocessor with default settings")
-                    self.preprocessor = Preprocessor()
-            print("Preprocessor loaded/created successfully")
+            try:
+                with open(preprocessor_path, "rb") as f:
+                    # Try to load with custom unpickler
+                    class CustomUnpickler(pickle.Unpickler):
+                        def find_class(self, module, name):
+                            if module == "preprocessing":
+                                module = "app.utils.data_preprocessing"
+                            return super().find_class(module, name)
+                    
+                    self.preprocessor = CustomUnpickler(f).load()
+                print("Preprocessor loaded successfully")
+            except Exception as e:
+                print(f"Error loading preprocessor: {str(e)}")
+                print("Creating new preprocessor with default settings")
+                self.preprocessor = Preprocessor()
+                # Save the new preprocessor
+                with open(preprocessor_path, "wb") as f:
+                    pickle.dump(self.preprocessor, f)
+                print("New preprocessor created and saved successfully")
             
             # Load feature names if available
             try:
@@ -89,8 +99,7 @@ class ModelService:
             
             # Rename columns to match expected format
             df = df.rename(columns={
-                'home_ownership': 'house_ownership',
-                'marital_status': 'marital_Status'
+                'home_ownership': 'house_ownership'
             })
             
             # Transform the data
@@ -108,8 +117,24 @@ class ModelService:
         try:
             print(f"Application data: {application}")
             
-            # Preprocess the data
-            X = self._preprocess_data(application)
+            # Convert Pydantic model to DataFrame
+            data_dict = application.dict()
+            # Convert enum values to their string representations
+            for key, value in data_dict.items():
+                if hasattr(value, 'value'):
+                    data_dict[key] = value.value
+            
+            df = pd.DataFrame([data_dict])
+            
+            # Rename columns to match expected format
+            df = df.rename(columns={
+                'home_ownership': 'house_ownership',
+                'marital_status': 'marital_Status'
+            })
+            
+            # Use the already loaded preprocessor
+            print("Using preprocessor to transform data")
+            X = self.preprocessor.transform(df)
             print(f"Preprocessed data shape: {X.shape}")
             
             # Get predictions from each model
