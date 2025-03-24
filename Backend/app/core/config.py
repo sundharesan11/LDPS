@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
-from typing import List
+from typing import List, ClassVar
+import os
 
 
 class Settings(BaseSettings):
@@ -11,10 +12,15 @@ class Settings(BaseSettings):
     CORS_ORIGINS: List[str] = [
         "http://localhost:3000"
     ]
-    
-    MODEL_1_PATH: str = rf"Backend\ml_models\random_forest_model.pkl"
-    MODEL_2_PATH: str = rf"Backend\ml_models\xgboost_model.pkl"
-    MODEL_3_PATH: str = rf"ml_models\model3.h5"
+    # Get the absolute path to the ml_models directory
+    # BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    BASE_DIR: ClassVar[str] = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+    MODEL_DIR: str = os.path.join(BASE_DIR, "ml_models")
+    MODEL_1_PATH: str = "random_forest_model.pkl"
+    MODEL_2_PATH: str = "xgb_model.pkl"
+    MODEL_3_PATH: str = "neural_network_model.h5"
+    PREPROCESSOR_PATH: str = "preprocessor.pkl"
 
     class Config:
         env_file = ".env"  # Load from a .env file
