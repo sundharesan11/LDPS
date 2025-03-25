@@ -1,7 +1,5 @@
 import sys
 import os
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import pandas as pd
 import pickle
 from sklearn.ensemble import RandomForestClassifier
@@ -14,7 +12,7 @@ from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.models import load_model
 from sklearn.metrics import roc_curve, auc
-from Backend.app.utils.preprocessing import Preprocessor, preprocess_for_prediction
+from bm_preprocessing import Preprocessor, preprocess_for_prediction
 from sklearn.model_selection import cross_val_score, train_test_split, StratifiedKFold
 
 
@@ -29,7 +27,9 @@ def rf_train_pipeline(data_train, y_train, data_test, y_test):
     testData, testLabels = preprocessor.transform(data_test, y_test, apply_smote=True)
     
     # Save the preprocessor for later use
-    preprocessor.save("preprocessor.pkl")
+    with open("preprocessor.pkl", "wb") as f:
+        pickle.dump(preprocessor, f)
+    # preprocessor.save("preprocessor.pkl")
     
     rf_optimum_params = {'criterion': 'gini', 'max_depth': 50, 'n_estimators': 800}
     
@@ -65,7 +65,8 @@ def xgb_train_pipeline(data_train, y_train, data_test, y_test):
     testData, testLabels = preprocessor.transform(data_test, y_test, apply_smote=True)
     
     # Save the preprocessor for later use
-    preprocessor.save("preprocessor.pkl")
+    with open("preprocessor.pkl", "wb") as f:
+        pickle.dump(preprocessor, f)
 
     optimum_params={'booster': 'gbtree', 'eval_metric': 'auc', 'max_depth': 50, 'n_estimators': 800, 'objective': 'binary:logistic', 'predictor': 'cpu_predictor', 'tree_method': 'hist'}
 
@@ -95,6 +96,9 @@ def neuralnetwork(data_train, y_train, data_test, y_test):
     
     # Transform the test data with SMOTE
     testData, testLabels = preprocessor.transform(data_test, y_test, apply_smote=True)
+
+    with open("preprocessor.pkl", "wb") as f:
+        pickle.dump(preprocessor, f)
 
     nn_model = Sequential([
         Dense(128, activation='relu', input_shape=(trainData.shape[1],)),
@@ -168,26 +172,26 @@ def predict_single_record():
     })
     prediction1, prediction2, prediction3 = predict_with_pipeline(new_data)
     
-    return prediction1,prediction2, prediction3
+    return prediction1, prediction2, prediction3
 
 
-# if __name__ == '__main__':
+if __name__ == '__main__':
 
-    # data = pd.read_csv("processed_training_data.csv")
+    data = pd.read_csv("processed_training_data.csv")
 
-    # y_true=data['risk_flag']
-    # #using stratify=y_true to have equal number of datapoints both in train and test datasets 
-    # data_train, data_test, y_train,  y_test = train_test_split(data.drop('risk_flag', axis=1), y_true, 
-    #                                                         stratify=y_true, test_size=0.3)
-    # data_train=data_train.reset_index(drop=True)
-    # data_test=data_test.reset_index(drop=True)
-    # y_train=y_train.reset_index(drop=True)
-    # y_test=y_test.reset_index(drop=True)
+    y_true=data['risk_flag']
+    #using stratify=y_true to have equal number of datapoints both in train and test datasets 
+    data_train, data_test, y_train,  y_test = train_test_split(data.drop('risk_flag', axis=1), y_true, 
+                                                            stratify=y_true, test_size=0.3)
+    data_train=data_train.reset_index(drop=True)
+    data_test=data_test.reset_index(drop=True)
+    y_train=y_train.reset_index(drop=True)
+    y_test=y_test.reset_index(drop=True)
 
-    # # preprocessor, model = rf_train_pipeline(data_train, y_train, data_test, y_test)
-    # # preprocessor, model = xgb_train_pipeline(data_train, y_train, data_test, y_test)
+    # preprocessor, model = rf_train_pipeline(data_train, y_train, data_test, y_test)
+    preprocessor, model = xgb_train_pipeline(data_train, y_train, data_test, y_test)
     # nn_model = neuralnetwork(data_train, y_train, data_test, y_test)
 
-    # a, b, c = predict_single_record()
-    # print(a, b, c)
-    # pass
+    a, b, c = predict_single_record()
+    print(a, b, c)
+    pass
