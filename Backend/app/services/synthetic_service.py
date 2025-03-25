@@ -10,7 +10,7 @@ from app.api.models import (
     CarOwnership,
     Profession,
     State,
-    MaritalStatusType
+    # MaritalStatusType
 )
 from app.core.config import get_settings
 
@@ -20,47 +20,76 @@ class SyntheticService:
         self.age_range = (18, 70)
         self.income_range = (25000, 150000)
         self.experience_range = (0, 50)
-        self.current_job_years_range = (0,50)
-        self.current_house_years_range = (0, 50),
+        self.current_job_years_range = (0, 50)
+        self.current_house_years_range = (0, 50)
     
-        
     def _generate_defaulter(self) -> LoanApplicationRequest:
         """Generate synthetic data for likely defaulter"""
-        return LoanApplicationRequest(
+        # Generate data
+        data = LoanApplicationRequest(
             age=np.random.randint(self.age_range[0], self.age_range[0]*2),
             income=np.random.uniform(self.income_range[0], self.income_range[1]),
-            current_house_years=np.random.uniform(self.current_house_years_range[0], self.current_house_years_range[1]),
-            current_job_years=np.random.uniform(self.current_job_years_range[0], self.current_job_years_range[1]),
-            experience=np.random.uniform(0, 3),
-            home_ownership=np.random.choice(list(HomeOwnershipType)).value,
-            marital_status=np.random.choice(list(MaritalStatusType)).value,
-            car_ownership=np.random.choice(list(CarOwnership)).value,
-            profession=np.random(list(Profession)).value,
-            state=np.random(list(State)).value
+            current_house_years=int(np.random.randint(self.current_house_years_range[0], self.current_house_years_range[1])),
+            current_job_years=int(np.random.randint(self.current_job_years_range[0], self.current_job_years_range[1])),
+            experience=int(np.random.randint(0, 3)),
+            home_ownership=np.random.choice([e.value for e in HomeOwnershipType]),
+            car_ownership=np.random.choice([e.value for e in CarOwnership]),
+            profession=np.random.choice([e.value for e in Profession]),
+            state=np.random.choice([e.value for e in State])
         )
+        print(f"\nGenerated Defaulter Data:")
+        print(f"Age: {data.age}")
+        print(f"Income: ₹{data.income:,.2f}")
+        print(f"Experience: {data.experience} years")
+        print(f"Current Job Years: {data.current_job_years}")
+        print(f"Current House Years: {data.current_house_years}")
+        print(f"Home Ownership: {data.home_ownership}")
+        print(f"Car Ownership: {data.car_ownership}")
+        print(f"Profession: {data.profession}")
+        print(f"State: {data.state}")
+        print("-" * 50)
+        return data
     
     def _generate_non_defaulter(self) -> LoanApplicationRequest:
         """Generate synthetic data for likely non-defaulter"""
-        return LoanApplicationRequest(
+        # Generate data
+        data = LoanApplicationRequest(
             age=np.random.randint(30, self.age_range[1]),
             income=np.random.uniform(self.income_range[0] * 1.5, self.income_range[1]),
-            current_house_years=np.random.uniform(self.current_house_years_range[0], self.current_house_years_range[1]),
-            current_job_years=np.random.uniform(self.current_job_years_range[0], self.current_job_years_range[1]),
-            experience=np.random.uniform(0, 50),
-            car_ownership=np.random.choice(list(CarOwnership)).value,
-            home_ownership=np.random.choice(list(HomeOwnershipType)).value,
-            marital_status=np.random.choice(list(MaritalStatusType)).value,
-            profession=np.random(list(Profession)).value,
-            state=np.random(list(State)).value
+            current_house_years=int(np.random.randint(self.current_house_years_range[0], self.current_house_years_range[1])),
+            current_job_years=int(np.random.randint(self.current_job_years_range[0], self.current_job_years_range[1])),
+            experience=int(np.random.randint(5, 50)),
+            car_ownership=np.random.choice([e.value for e in CarOwnership]),
+            home_ownership=np.random.choice([e.value for e in HomeOwnershipType]),
+            profession=np.random.choice([e.value for e in Profession]),
+            state=np.random.choice([e.value for e in State])
         )
+        print(f"\nGenerated Non-Defaulter Data:")
+        print(f"Age: {data.age}")
+        print(f"Income: ₹{data.income:,.2f}")
+        print(f"Experience: {data.experience} years")
+        print(f"Current Job Years: {data.current_job_years}")
+        print(f"Current House Years: {data.current_house_years}")
+        print(f"Home Ownership: {data.home_ownership}")
+        print(f"Car Ownership: {data.car_ownership}")
+        print(f"Profession: {data.profession}")
+        print(f"State: {data.state}")
+        print("-" * 50)
+        return data
     
     def generate(self, count: int = 1, default_ratio: Optional[float] = 0.3) -> List[LoanApplicationRequest]:
         """Generate synthetic loan application data"""
+        print(f"\nGenerating {count} synthetic records with {default_ratio*100:.1f}% defaulters")
+        print("=" * 50)
+        
         synthetic_data = []
         
         # Calculate how many defaulters to generate
         num_defaulters = int(count * default_ratio)
         num_non_defaulters = count - num_defaulters
+        
+        print(f"Generating {num_defaulters} defaulters and {num_non_defaulters} non-defaulters")
+        print("=" * 50)
         
         # Generate defaulters
         for _ in range(num_defaulters):
