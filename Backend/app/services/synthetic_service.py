@@ -23,7 +23,7 @@ class SyntheticService:
         self.current_job_years_range = (0, 50)
         self.current_house_years_range = (0, 50)
     
-    def _generate_defaulter(self) -> LoanApplicationRequest:
+    def _generate_defaulter(self, index: int) -> LoanApplicationRequest:
         """Generate synthetic data for likely defaulter"""
         # Generate data
         data = LoanApplicationRequest(
@@ -37,7 +37,7 @@ class SyntheticService:
             profession=np.random.choice([e.value for e in Profession]),
             state=np.random.choice([e.value for e in State])
         )
-        print(f"\nGenerated Defaulter Data:")
+        print(f"\nDefaulter Entry #{index + 1}:")
         print(f"Age: {data.age}")
         print(f"Income: ₹{data.income:,.2f}")
         print(f"Experience: {data.experience} years")
@@ -50,7 +50,7 @@ class SyntheticService:
         print("-" * 50)
         return data
     
-    def _generate_non_defaulter(self) -> LoanApplicationRequest:
+    def _generate_non_defaulter(self, index: int) -> LoanApplicationRequest:
         """Generate synthetic data for likely non-defaulter"""
         # Generate data
         data = LoanApplicationRequest(
@@ -64,7 +64,7 @@ class SyntheticService:
             profession=np.random.choice([e.value for e in Profession]),
             state=np.random.choice([e.value for e in State])
         )
-        print(f"\nGenerated Non-Defaulter Data:")
+        print(f"\nNon-Defaulter Entry #{index + 1}:")
         print(f"Age: {data.age}")
         print(f"Income: ₹{data.income:,.2f}")
         print(f"Experience: {data.experience} years")
@@ -91,16 +91,28 @@ class SyntheticService:
         print(f"Generating {num_defaulters} defaulters and {num_non_defaulters} non-defaulters")
         print("=" * 50)
         
+        print("\nDEFAULTER ENTRIES:")
+        print("=" * 50)
         # Generate defaulters
-        for _ in range(num_defaulters):
-            synthetic_data.append(self._generate_defaulter())
+        for i in range(num_defaulters):
+            synthetic_data.append(self._generate_defaulter(i))
         
+        print("\nNON-DEFAULTER ENTRIES:")
+        print("=" * 50)
         # Generate non-defaulters
-        for _ in range(num_non_defaulters):
-            synthetic_data.append(self._generate_non_defaulter())
+        for i in range(num_non_defaulters):
+            synthetic_data.append(self._generate_non_defaulter(i))
         
         # Shuffle the data
         np.random.shuffle(synthetic_data)
+        
+        # Print final summary
+        print("\nSUMMARY:")
+        print("=" * 50)
+        print(f"Total entries generated: {len(synthetic_data)}")
+        print(f"Defaulters: {num_defaulters}")
+        print(f"Non-defaulters: {num_non_defaulters}")
+        print("=" * 50)
         
         return synthetic_data
 
