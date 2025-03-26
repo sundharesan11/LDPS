@@ -10,6 +10,7 @@ import {
 import DataEntryForm from './components/DataEntryForm';
 import SyntheticGenerator from './components/SyntheticGenerator';
 import ResultsDisplay from './components/ResultsDisplay';
+import SyntheticResults from './components/SyntheticResults';
 import { predictLoanDefault, generateSyntheticData } from './services/api';
 
 import './App.css';
@@ -24,6 +25,7 @@ const App = () => {
   const [predictionResults, setPredictionResults] = useState(null);
   const [applicationData, setApplicationData] = useState(null);
   const [activeTab, setActiveTab] = useState('1');
+  const [syntheticData, setSyntheticData] = useState(null);
 
   const handlePrediction = async (formData) => {
     setLoading(true);
@@ -33,6 +35,7 @@ const App = () => {
       const results = await predictLoanDefault(formData);
       setPredictionResults(results);
       setApplicationData(formData);
+      setSyntheticData(null); // Clear synthetic data when using manual entry
       setActiveTab('3'); // Switch to results tab
     } catch (error) {
       setError('Failed to get prediction. Please try again.');
@@ -48,13 +51,14 @@ const App = () => {
     
     try {
       // Generate synthetic data
-      const syntheticData = await generateSyntheticData(count, defaultRatio);
+      const data = await generateSyntheticData(count, defaultRatio);
       
-      if (syntheticData && syntheticData.length > 0) {
-        // Use the first generated record
-        const firstRecord = syntheticData[0];
+      if (data && data.length > 0) {
+        // Store the full synthetic data
+        setSyntheticData(data);
         
-        // Predict using this record
+        // Use the first generated record for prediction
+        const firstRecord = data[0];
         const results = await predictLoanDefault(firstRecord);
         
         setPredictionResults(results);
@@ -123,6 +127,11 @@ const App = () => {
                   results={predictionResults} 
                   applicationData={applicationData}
                 />
+                {syntheticData && (
+                  <div style={{ marginTop: 24 }}>
+                    <SyntheticResults data={syntheticData} />
+                  </div>
+                )}
               </TabPane>
             </Tabs>
           </Spin>

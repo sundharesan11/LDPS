@@ -19,12 +19,9 @@ export const predictLoanDefault = async (applicationData) => {
   }
 };
 
-export const generateSyntheticData = async (count = 1, defaultRatio = 0.3) => {
+export const generateSyntheticData = async (count, defaultRatio) => {
   try {
-    const response = await apiClient.post('/generate-synthetic', {
-      count,
-      default_ratio: defaultRatio
-    });
+    const response = await apiClient.post('/generate-synthetic', { count, default_ratio: defaultRatio });
     return response.data;
   } catch (error) {
     console.error('Error generating synthetic data:', error);
